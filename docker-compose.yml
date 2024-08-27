@@ -1,0 +1,50 @@
+version: '3'
+services:
+  #DB Service
+  school-db:
+    container_name: school-db
+    image: mysql:8.0.32
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./script.sql:/docker-entrypoint-initdb.d/script.sql
+      - mysql:/var/lib/mysql
+    restart: on-failure
+    networks:
+      - school-net
+
+  #Student Service
+  student:
+    container_name: student
+    image: kritikasingh02/student:v1
+    environment:
+      DB_HOST: school-db
+    ports:
+      - "1234:8082"
+    depends_on:
+      - school-db
+    volumes:
+      - school-data:/wockspace/data
+    restart: on-failure
+    networks:
+      - school-net
+
+  # Teacher Service
+  teacher:
+    container_name: teacher
+    image: kritikasingh02/teacher:v1
+    ports:
+      - "1235:8084"
+    volumes:
+      - school-data:/wockspace/data
+    restart: on-failure
+    networks:
+      - school-net
+  
+networks:
+  school-net:
+volumes:
+  school-data:     
+  mysql: 
